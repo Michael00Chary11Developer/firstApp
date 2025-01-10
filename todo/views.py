@@ -1,66 +1,63 @@
-# from rest_framework.request import Request
-# from rest_framework.response import Response
-# from .models import Todo
-# from .serializers import TodoSerializer
-# from rest_framework import status
-# from rest_framework.decorators import api_view
-
-
-# @api_view(['GET','POST'])
-# def all_todos(request: Request):
-#     if request.method == "GET":
-#         todos = Todo.objects.order_by('priority').all()
-#         todo_serializer = TodoSerializer(todos, many=True)
-#         return Response(todo_serializer.data, status.HTTP_200_OK)
-#     elif request.method == "POST":
-#         deserialier = TodoSerializer(data=request.data)
-#         if deserialier.is_valid():
-#             deserialier.save()
-#             return Response(deserialier.data, status.HTTP_201_CREATED)
-#     return Response(None, status.HTTP_400_BAD_REQUEST)
-
-
 from django.shortcuts import render
+from .models import Title
+from .serializers import TitleSerializer
+from rest_framework import viewsets
+from rest_framework.mixins import CreateModelMixin, ListModelMixin, DestroyModelMixin, RetrieveModelMixin, UpdateModelMixin
+from rest_framework.generics import GenericAPIView, ListAPIView, CreateAPIView, DestroyAPIView, RetrieveAPIView, UpdateAPIView
 from rest_framework.request import Request
 from rest_framework.response import Response
-from .models import Todo
-from .serializers import TodoSerializer
-from rest_framework import status
-from rest_framework.decorators import api_view
+from rest_framework.authentication import BasicAuthentication, TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 # Create your views here.
 
 
-# POST And GRT
-
-@api_view(['GET', 'POST'])
-def all_todos(request: Request):
-    if request.method == 'GET':
-        todos = Todo.objects.order_by("priority").all()
-        todo_serializer = TodoSerializer(todos, many=True)
-        return Response(todo_serializer.data, status.HTTP_200_OK)
-    elif request.method == 'POST':
-        serailizer = TodoSerializer(data=request.data)
-        if serailizer.is_valid():
-            serailizer.save()
-            return Response(serailizer.data, status.HTTP_201_CREATED)
-    return Response(None, status.HTTP_400_BAD_REQUEST)
+class ViewSetExample(viewsets.ModelViewSet):
+    queryset = Title.objects.order_by("id").all()
+    serializer_class = TitleSerializer
+    authentication_classes = [BasicAuthentication]
+    permission_classes = [IsAuthenticated]
 
 
-@api_view(['GET', 'PUT', 'DELETE'])
-def todo_deatil_view(request: Request, todo_id=int):
-    # if not exit error will occured => get error
-    # todo = Todo.objects.get(pk=todo_id)
-    # todo = Todo.objects.filter(pk=todo_id).first()
-    try:
-        todo = Todo.objects.get(pk=todo_id)
-    except todo.DoesNotExist:
-        return Response(None, status.HTTP_404_NOT_FOUND)
+class DetailMixinsExample(DestroyModelMixin, RetrieveModelMixin, UpdateModelMixin, GenericAPIView):
+    queryset = Title.objects.order_by("id").all()
+    serializer_class = TitleSerializer
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
 
-    if request.method == "GET":
-        serialize = TodoSerializer(todo)
-        return Response(serialize.data, status.HTTP_200_OK)
-     
-    # if request.method == "GET":
-    #     serialize = TodoSerializer(todo)
-    #     return Response(serialize.data, status.HTTP_200_OK)
+    def get(self, request: Request, pk):
+        return self.retrieve(request, pk)
+
+    def delete(self, request: Request, pk):
+        return self.destroy(request, pk)
+
+    def put(self, request: Request, pk):
+        return self.update(request, pk)
+
+
+class MixinsExample(CreateModelMixin, ListModelMixin, GenericAPIView):
+    queryset = Title.objects.order_by("id").all()
+    serializer_class = TitleSerializer
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request: Request):
+        return self.list(request)
+
+    def post(self, request: Request):
+        return self.create(request)
+
+
+class GenericExample(CreateAPIView, ListAPIView):
+    queryset = Title.objects.order_by("id").all()
+    serializer_class = TitleSerializer
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+
+class DetailGenericExample(DestroyAPIView, RetrieveAPIView, UpdateAPIView):
+    queryset = Title.objects.order_by("id").all()
+    serializer_class = TitleSerializer
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]

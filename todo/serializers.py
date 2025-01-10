@@ -1,19 +1,8 @@
 from rest_framework import serializers
-from .models import Todo
+from .models import Title
 
 
-# class TodoSerializer(serializers.Serializer):
-#     id = serializers.IntegerField()
-#     title = serializers.CharField()
-
-class TodoSerializer(serializers.ModelSerializer):
+class TitleSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Todo
+        model = Title
         fields = '__all__'
-        # fields = ['id', 'title', 'content']
-
-
-# class TodoSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Todo
-#         fields = ['id', 'title', 'content']
